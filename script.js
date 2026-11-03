@@ -18,7 +18,7 @@
       return;
     }
     output.textContent = responses[[...text].reduce((sum, char) => sum + char.charCodeAt(0), 0) % responses.length];
-    button.innerHTML = 'Another angle <span>↗</span>';
+    button.innerHTML = 'Another angle <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>';
   });
 
   input?.addEventListener('keydown', (event) => {
@@ -84,11 +84,10 @@ function initBuildSwarm() {
     { selector: '.signal-strip', label: 'signal', color: '#6d28d9', shape: 'arrow' },
   ];
 
-  const ARROW = 'M4.6 3.9 C4.2 3.1 4.9 2.4 5.7 2.8 L20.6 9.4 C21.5 9.8 21.4 11.1 20.4 11.3 L13.9 12.9 C13.4 13 13 13.4 12.9 13.9 L11.3 20.4 C11.1 21.4 9.8 21.5 9.4 20.6 Z';
   const svgFor = (shape, color) => {
     if (shape === 'cross') return `<g fill="none" stroke="${color}" stroke-width="1.5"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3" fill="${color}"/></g>`;
     if (shape === 'ibeam') return `<path d="M8 4 H16 M12 4 V20 M8 20 H16" fill="none" stroke="${color}" stroke-width="1.5"/>`;
-    return `<path d="${ARROW}" fill="${color}" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/>`;
+    return `<g fill="none" stroke="${color}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 3.5 20 11c1.2.6 1.1 2.3-.1 2.7l-5.7 1.8-1.8 5.7c-.4 1.2-2.1 1.3-2.7.1Z"/><path d="m13.5 13.5 5.5 5.5"/></g>`;
   };
   const ease = (value) => 1 - Math.pow(1 - value, 3);
   const cursors = [];
