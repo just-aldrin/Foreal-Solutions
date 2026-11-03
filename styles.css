@@ -864,29 +864,42 @@ h1 em, h2 em { font-style: normal; color: var(--lime); }
 }
 
 @media (max-width: 600px) {
+  #swarm-root { display: none; }
   .shell { width: min(100% - 28px, 520px); }
-  .site-header { padding-inline: 12px; gap: 10px; }
+  .site-header {
+    height: 82px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: 34px 22px;
+    align-content: center;
+    gap: 5px 12px;
+    padding: 8px 12px;
+  }
   .brand { flex: 0 0 auto; }
-  section[id] { scroll-margin-top: 76px; }
-  .brand-image { width: 84px; height: 34px; }
+  section[id] { scroll-margin-top: 94px; }
+  .brand-image { width: 78px; height: 32px; }
+  .main-nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 9px;
+    letter-spacing: 0.06em;
+  }
   .nav-cta {
-    position: absolute;
-    left: auto;
-    right: 12px;
-    width: 44px;
-    height: 44px;
-    top: 50%;
-    transform: translateY(-50%);
-    margin-left: 0;
-    padding: 0;
+    grid-column: 2;
+    grid-row: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 0;
+    gap: 6px;
+    padding: 9px 12px;
+    font-size: 11px;
   }
-  .nav-cta span { margin-left: 0; font-size: 14px; }
-  .nav-cta span { margin-left: 5px; }
-  .hero { padding-top: 92px; padding-bottom: 62px; }
+  .nav-cta .icon { width: 12px; height: 12px; margin-left: 0; }
+  .hero { padding-top: 104px; padding-bottom: 62px; }
   h1 { font-size: clamp(48px, 16vw, 76px); letter-spacing: -0.09em; }
   .hero-intro { max-width: 300px; font-size: 16px; margin-bottom: 28px; }
   .hero-actions { gap: 18px; flex-wrap: wrap; }
@@ -929,6 +942,13 @@ h1 em, h2 em { font-style: normal; color: var(--lime); }
   .footer-bottom { font-size: 8px; }
   .swarm-cursor svg { width: 18px; height: 18px; }
   .swarm-name { left: 10px; top: 12px; padding: 1px 4px; font-size: 7px; line-height: 12px; }
+}
+
+@media (max-width: 360px) {
+  .site-header { padding-inline: 10px; }
+  .brand-image { width: 68px; height: 29px; }
+  .main-nav { gap: 8px; font-size: 8px; letter-spacing: 0.04em; }
+  .nav-cta { padding-inline: 9px; font-size: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
