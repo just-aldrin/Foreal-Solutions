@@ -74,11 +74,11 @@ function initBuildSwarm() {
   document.body.classList.add('swarm-on');
   const isMobile = window.matchMedia('(max-width: 600px)').matches;
   const targets = isMobile ? [
-    { selector: '.brand', viewportAnchored: true, label: 'identity', color: '#d5f21a', shape: 'arrow' },
+    { selector: '.brand', label: 'identity', color: '#d5f21a', shape: 'arrow' },
     { selector: '.hero-art', label: 'visual', color: '#17d6d3', shape: 'arrow' },
     { selector: '.hero-copy h1', anchorSelector: '.hero-row em', label: 'headline', color: '#ed3c85', shape: 'arrow' },
   ] : [
-    { selector: '.brand', viewportAnchored: true, label: 'identity', color: '#d5f21a', shape: 'arrow' },
+    { selector: '.brand', label: 'identity', color: '#d5f21a', shape: 'arrow' },
     { selector: '.hero-copy h1', anchorSelector: '.hero-row em', label: 'headline', color: '#ed3c85', shape: 'arrow' },
     { selector: '.hero-art', label: 'visual', color: '#17d6d3', shape: 'arrow' },
     { selector: '.signal-strip', label: 'signal', color: '#6d28d9', shape: 'arrow' },
@@ -91,28 +91,15 @@ function initBuildSwarm() {
     return `<path d="${ARROW}" fill="${color}" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/>`;
   };
   const ease = (value) => 1 - Math.pow(1 - value, 3);
-  const cornerPoint = (rect, index) => {
-    const fromRight = index % 2 === 0;
-    return {
-      x: fromRight ? rect.right - 7 : rect.left + 7,
-      y: rect.top + 7,
-    };
-  };
   const cursors = [];
   const overlays = [];
 
-  const pointFor = (el, index, anchorEl = el, viewportAnchored = false) => {
-    const rect = el.getBoundingClientRect();
-    const anchorRect = anchorEl.getBoundingClientRect();
-    const corner = cornerPoint(rect, index);
-    const anchorPoint = anchorEl === el
-      ? corner
-      : { x: anchorRect.right, y: anchorRect.top + anchorRect.height * 0.55 };
+  const cornerPoint = (rect, index, bottom = false) => {
+    const fromRight = index % 2 === 0;
     return {
-      x: Math.max(18, Math.min(innerWidth - 30, anchorPoint.x)),
-      y: Math.max(24, Math.min(innerHeight - 30, anchorPoint.y + (viewportAnchored ? 0 : scrollY))),
-      rect,
-      fromRight: index % 2 === 0,
+      x: fromRight ? rect.right - 7 : rect.left + 7,
+      y: bottom ? rect.bottom - 7 : rect.top + 7,
+      fromRight,
     };
   };
 
@@ -121,87 +108,119 @@ function initBuildSwarm() {
     if (!element) return;
     const anchorElement = target.anchorSelector ? document.querySelector(target.anchorSelector) : element;
     if (!anchorElement) return;
-    const point = pointFor(element, index, anchorElement, target.viewportAnchored);
+    const rect = element.getBoundingClientRect();
+    const startPoint = cornerPoint(rect, index);
     const cursor = document.createElement('div');
     cursor.className = 'swarm-cursor';
     cursor.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24">${svgFor(target.shape, target.color)}</svg><span class="swarm-name">${target.label}</span>`;
     cursor.querySelector('.swarm-name').style.background = target.color;
     if (target.color === '#d5f21a') cursor.querySelector('.swarm-name').style.color = '#121016';
     cursorsEl.appendChild(cursor);
+
     const overlay = document.createElement('div');
     overlay.className = 'swarm-box';
     overlay.dataset.badge = target.label;
+    overlay.style.left = `${rect.left}px`;
+    overlay.style.top = `${rect.top}px`;
+    overlay.style.width = `${rect.width}px`;
+    overlay.style.height = `${rect.height}px`;
+    overlay.style.transformOrigin = startPoint.fromRight ? 'top right' : 'top left';
     overlaysEl.appendChild(overlay);
-    cursors.push({ cursor, element, anchorElement, viewportAnchored: target.viewportAnchored, point, index });
-    overlay.style.left = `${point.rect.left}px`;
-    overlay.style.top = `${point.rect.top}px`;
-    overlay.style.width = `${point.rect.width}px`;
-    overlay.style.height = `${point.rect.height}px`;
-    overlay.style.transformOrigin = point.fromRight ? 'top right' : 'top left';
-    overlays.push({ overlay, element, index });
+
+    cursors.push({ cursor, element, anchorElement, index, startPoint });
+    overlays.push(overlay);
   });
 
   const started = performance.now();
-  const arrivalDuration = 1500;
-  const holdDuration = 360;
-  const highlightDuration = 1150;
-  const gap = 620;
+  const arrivalDuration = 720;
+  const holdDuration = 110;
+  const dragDuration = 760;
+  const settleDuration = 260;
+  const gap = 300;
   const startPositions = cursors.map((_, index) => ({
     x: index % 2 ? innerWidth + 34 : -34,
-    y: Math.max(42, Math.min(innerHeight - 120, innerHeight * 0.22 + index * 44)),
+    y: Math.max(42, Math.min(innerHeight - 120, innerHeight * 0.2 + index * 40)),
   }));
   let settled = false;
+  let anchorFrame = 0;
 
-  const placeAtStationaryPoint = (item) => {
-    const x = Math.max(18, Math.min(innerWidth - 30, item.point.x));
-    const y = Math.max(24, Math.min(innerHeight - 30, item.point.y));
-    item.cursor.style.transform = `translate(${x}px, ${y}px)`;
+  const getRect = (item) => item.element.getBoundingClientRect();
+  const placeAtBottom = (item) => {
+    const point = cornerPoint(getRect(item), item.index, true);
+    item.cursor.style.transform = `translate(${point.x}px, ${point.y}px)`;
+  };
+
+  const refreshGeometry = () => {
+    cursors.forEach((item, index) => {
+      const rect = getRect(item);
+      const startPoint = cornerPoint(rect, index);
+      item.startPoint = startPoint;
+      const box = overlays[index];
+      if (!box) return;
+      box.style.left = `${rect.left}px`;
+      box.style.top = `${rect.top}px`;
+      box.style.width = `${rect.width}px`;
+      box.style.height = `${rect.height}px`;
+      box.style.transformOrigin = startPoint.fromRight ? 'top right' : 'top left';
+    });
   };
 
   const render = (now) => {
     const elapsed = now - started;
     cursors.forEach((item, index) => {
       const local = Math.max(0, elapsed - index * gap);
-      const travelProgress = ease(Math.max(0, Math.min(1, local / arrivalDuration)));
-      const dragProgress = ease(Math.max(0, Math.min(1, (local - arrivalDuration - holdDuration) / highlightDuration)));
+      const rect = getRect(item);
+      const startPoint = cornerPoint(rect, index);
+      const endPoint = cornerPoint(rect, index, true);
+      const travel = ease(Math.min(1, local / arrivalDuration));
+      const drag = ease(Math.max(0, Math.min(1, (local - arrivalDuration - holdDuration) / dragDuration)));
+      const settle = ease(Math.max(0, Math.min(1, (local - arrivalDuration - holdDuration - dragDuration) / settleDuration)));
       const start = startPositions[index];
-      const x = start.x + (item.point.x - start.x) * travelProgress;
-      const y = start.y + (item.point.y - start.y) * travelProgress;
-      item.cursor.style.transform = `translate(${x}px, ${y}px)`;
-      const highlightStarted = local >= arrivalDuration + holdDuration;
-      const complete = local >= arrivalDuration + holdDuration + highlightDuration;
+      const cursorX = local < arrivalDuration
+        ? start.x + (startPoint.x - start.x) * travel
+        : startPoint.x + (endPoint.x - startPoint.x) * Math.max(drag, settle);
+      const cursorY = local < arrivalDuration
+        ? start.y + (startPoint.y - start.y) * travel
+        : startPoint.y + (endPoint.y - startPoint.y) * Math.max(drag, settle);
+      item.cursor.style.transform = `translate(${cursorX}px, ${cursorY}px)`;
+
+      const drawing = local >= arrivalDuration + holdDuration;
+      const complete = local >= arrivalDuration + holdDuration + dragDuration + settleDuration;
       item.cursor.classList.toggle('is-building', !complete);
       item.cursor.classList.toggle('is-settled', complete);
       const box = overlays[index];
-      const scale = Math.max(0.02, dragProgress);
-      box.overlay.style.transform = `scale(${scale})`;
-      box.overlay.style.opacity = highlightStarted ? `${Math.min(1, dragProgress * 1.6)}` : '0';
+      box.style.transform = `scale(${Math.max(0.02, drag)})`;
+      box.style.opacity = drawing ? `${Math.min(1, drag * 1.5)}` : '0';
     });
-    if (elapsed < (targets.length - 1) * gap + arrivalDuration + holdDuration + highlightDuration + 700) requestAnimationFrame(render);
-    else {
+
+    const total = (targets.length - 1) * gap + arrivalDuration + holdDuration + dragDuration + settleDuration + 220;
+    if (elapsed < total) {
+      requestAnimationFrame(render);
+    } else {
       settled = true;
       root.classList.add('swarm-complete');
       overlaysEl.innerHTML = '';
-      cursors.forEach((item) => item.cursor.classList.add('is-settled'));
-      cursors.forEach(placeAtStationaryPoint);
+      cursors.forEach((item) => {
+        item.cursor.classList.add('is-settled');
+        placeAtBottom(item);
+      });
     }
   };
   requestAnimationFrame(render);
 
-  const refreshBuildTargets = () => {
-    cursors.forEach((item, index) => {
-      item.point = pointFor(item.element, index, item.anchorElement, item.viewportAnchored);
-      const box = overlays[index];
-      if (!box) return;
-      box.overlay.style.left = `${item.point.rect.left}px`;
-      box.overlay.style.top = `${item.point.rect.top}px`;
-      box.overlay.style.width = `${item.point.rect.width}px`;
-      box.overlay.style.height = `${item.point.rect.height}px`;
-      box.overlay.style.transformOrigin = item.point.fromRight ? 'top right' : 'top left';
+  const updateAnchoredCursors = () => {
+    if (!settled || anchorFrame) return;
+    anchorFrame = requestAnimationFrame(() => {
+      anchorFrame = 0;
+      cursors.forEach(placeAtBottom);
     });
   };
+  window.addEventListener('scroll', updateAnchoredCursors, { passive: true });
   window.addEventListener('resize', () => {
-    if (!settled) refreshBuildTargets();
-    else cursors.forEach(placeAtStationaryPoint);
+    if (!settled) refreshGeometry();
+    else {
+      refreshGeometry();
+      updateAnchoredCursors();
+    }
   });
 }
