@@ -1,2 +1,11 @@
-# Foreal-Solutions
-Foreal Solutions is a student-led technology startup from WVSU, Iloilo City, building practical, data-driven digital solutions for real-world communities. This project is the studio’s website—sharing its mission, work, and journey from ideas to impact.
+# Foreal Solutions
+
+Static website built with HTML, CSS, and vanilla JavaScript.
+
+## Run locally
+
+Open `index.html` in a browser, or serve this folder with a local web server.
+
+## Deploy with Vercel
+
+Import this repository in Vercel and deploy it as a static site. No build command or output directory is required; the site entry point is `index.html`.
