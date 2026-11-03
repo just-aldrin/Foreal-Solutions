@@ -1015,6 +1015,7 @@ h1 em, h2 em { font-style: normal; color: var(--lime); }
   .story-block-origin .story-visual, .story-block-new-chapter .story-visual { min-height: 260px; }
   .story-block-origin .story-visual img, .story-block-new-chapter .story-visual img { min-height: 260px; }
   .story-pair .story-visual { aspect-ratio: 1 / 1.12; }
+  .story-pair .story-visual img { object-fit: cover; }
   .band { height: 62vw; min-height: 210px; }
   .live-idea { padding-block: 60px 68px; }
   .idea-machine { padding: 18px; }
