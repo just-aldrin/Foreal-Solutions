@@ -589,6 +589,62 @@ function initBuildSwarm() {
   const ease = (value) => 1 - Math.pow(1 - value, 3);
   const cursors = [];
 
+  // A quick chalk-scratch sound plays the instant a box starts framing its
+  // element -- synthesized filtered noise, no audio file needed.
+  let swarmAudioCtx = null;
+  const ensureSwarmAudio = () => {
+    if (!swarmAudioCtx) {
+      try { swarmAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch (e) { return null; }
+    }
+    if (swarmAudioCtx.state === 'suspended') swarmAudioCtx.resume().catch(() => {});
+    return swarmAudioCtx;
+  };
+  // Browsers mute audio until a user gesture happens. The swarm plays on
+  // its own right after page load, so the earliest cursors can miss it --
+  // prime/resume the context on the very first interaction anywhere on the
+  // page so later cursors in the same run have a real shot at being heard.
+  const primeSwarmAudio = () => ensureSwarmAudio();
+  ['pointerdown', 'keydown', 'touchstart'].forEach((type) => {
+    document.addEventListener(type, primeSwarmAudio, { once: true, passive: true });
+  });
+  // durationSec must match exactly how long that cursor's box takes to
+  // draw (dragDuration below) -- a clean synth blip, no noise/texture:
+  // a soft tick the instant framing starts, then a crisp two-note
+  // ascending "ding" the instant it locks into place.
+  const playFrameBlip = (durationSec) => {
+    const ctx = ensureSwarmAudio();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    const startTick = ctx.createOscillator();
+    startTick.type = 'sine';
+    startTick.frequency.value = 880;
+    const startGain = ctx.createGain();
+    startGain.gain.setValueAtTime(0, now);
+    startGain.gain.linearRampToValueAtTime(0.035, now + 0.012);
+    startGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+    startTick.connect(startGain).connect(ctx.destination);
+    startTick.start(now);
+    startTick.stop(now + 0.08);
+
+    const lockAt = now + durationSec;
+    const notes = [1046.5, 1318.5]; // C6 -> E6, a quick confident "ding"
+    notes.forEach((freq, i) => {
+      const t = lockAt + i * 0.045;
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.07, t + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.18);
+    });
+  };
+
   const cornerPoint = (rect, index, bottom = false) => {
     const fromRight = index % 2 === 0;
     return {
@@ -612,7 +668,7 @@ function initBuildSwarm() {
     overlay.style.setProperty('--swarm-color', target.color);
     overlaysEl.appendChild(overlay);
 
-    cursors.push({ cursor, overlay, anchorSelector: target.selector, index });
+    cursors.push({ cursor, overlay, anchorSelector: target.selector, index, soundPlayed: false });
   });
 
   const started = performance.now();
@@ -654,6 +710,10 @@ function initBuildSwarm() {
       item.cursor.style.transform = `translate(${cursorX}px, ${cursorY}px)`;
 
       const drawing = local >= arrivalDuration + holdDuration;
+      if (drawing && !item.soundPlayed) {
+        item.soundPlayed = true;
+        playFrameBlip(dragDuration / 1000);
+      }
       const complete = local >= arrivalDuration + holdDuration + dragDuration + settleDuration;
       item.cursor.classList.toggle('is-building', !complete);
       item.cursor.classList.toggle('is-settled', complete);
