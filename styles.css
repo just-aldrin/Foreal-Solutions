@@ -846,13 +846,11 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
   z-index: 1;
   font-size: clamp(34px, 5vw, 60px);
   line-height: .94;
-  max-width: 640px;
   margin-bottom: 18px;
 }
 .contact-copy {
   position: relative;
   z-index: 1;
-  max-width: 360px;
   color: #f0e9f6;
   font-size: 17px;
   margin-bottom: 28px;
@@ -1243,7 +1241,8 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
   .route-item p { font-size: 14px; }
   .contact-section { min-height: 420px; }
   .contact-inner { width: min(100% - 28px, 520px); padding-top: 68px; }
-  .contact-section h2 { font-size: clamp(32px, 11vw, 48px); }
+  .contact-section h2 { font-size: clamp(22px, 7.4vw, 44px); }
+  .contact-copy { font-size: clamp(12px, 3.4vw, 17px); }
   .contact-actions { margin-bottom: 56px; }
   .button-light, .button-ghost { width: 100%; }
   .inquiry-form { padding: 16px; }
