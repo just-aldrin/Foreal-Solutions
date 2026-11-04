@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Foreal Solutions field notes: ideas, experiments, and lessons from building useful technology." />
+    <title>Foreal Solutions — Field notes</title>
+    <link rel="icon" type="image/png" href="assets/ICON.png" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .blog-page { min-height: 100vh; padding: 150px 0 100px; }
+      .blog-page-head { display:flex; justify-content:space-between; align-items:end; gap:30px; border-bottom:1px solid var(--line); padding-bottom:34px; }
+      .blog-page h1 { font-size:clamp(36px, 6vw, 64px); margin:0 0 14px; }
+      .blog-page-intro { color:var(--muted); font-size:20px; max-width:620px; margin:0; }
+      .blog-tools { display:flex; gap:8px; }
+      .view-toggle { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border:1px solid var(--line); background:transparent; color:var(--muted); padding:0; cursor:pointer; border-radius:8px; } .view-toggle svg { width:16px; height:16px; } .view-toggle.is-active { color:var(--on-accent); background:var(--lime); border-color:var(--lime); }
+      .blog-page-grid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:18px; padding-top:50px; }
+      .blog-page-card { display:flex; flex-direction:column; border:1px solid var(--line); background:var(--panel); }
+      .blog-page-card-content { display:flex; flex:1; flex-direction:column; padding:22px; }
+      .blog-page-card time { color:var(--muted); font:10px var(--mono); text-transform:uppercase; }
+      .blog-page-card h2 { font-size:clamp(24px, 3vw, 36px); line-height:1; letter-spacing:-.05em; margin:18px 0 12px; }
+      .blog-page-card p { color:var(--muted); margin:0 0 22px; }
+      .blog-page-card a { align-self:flex-start; margin-top:auto; color:var(--lime-text); font:11px var(--mono); text-transform:uppercase; }
+      .blog-page-list .blog-page-grid { display:block; }
+      .blog-page-list .blog-page-card { border-width:1px 0 0; padding:28px 0; background:transparent; }
+      .blog-page-list .blog-page-card-content { padding:0; }
+      @media (max-width:800px) { .blog-page { padding-top:110px; } .blog-page-head { display:block; } .blog-tools { margin-top:24px; } .blog-page-grid { grid-template-columns:1fr; } }
+    </style>
+  </head>
+  <body>
+    <div id="swarm-root" aria-hidden="true">
+      <div class="swarm-cursors"></div>
+      <div class="swarm-overlays"></div>
+    </div>
+    <div id="foreal-cursor-trail" aria-hidden="true"></div>
+    <header class="site-header">
+      <a class="brand" href="index.html#top" aria-label="Foreal Solutions home"><img class="brand-image" src="assets/foreal-logo-transparent.png" alt="Foreal Solutions" /></a>
+      <nav class="main-nav" aria-label="Primary navigation"><a href="index.html#about">About</a><a href="index.html#pillars">Pillars</a><a href="index.html#story">Story</a><a href="blog.html">Blog</a><a href="index.html#contact">Contact</a></nav>
+      <div class="header-actions">
+        <a class="nav-cta" href="index.html#contact">Start something <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+      </div>
+    </header>
+    <main class="blog-page">
+      <div class="shell">
+        <div class="blog-page-head">
+          <div><p class="eyebrow">foreal / field notes</p><h1>blog</h1><p class="blog-page-intro">Field notes on the people, partnerships, and ideas moving Foreal Solutions forward.</p></div>
+          <div class="blog-tools" aria-label="Blog layout"><button class="view-toggle is-active" data-view="grid" type="button" aria-label="Grid view"><i data-lucide="layout-grid" class="icon" aria-hidden="true"></i></button><button class="view-toggle" data-view="list" type="button" aria-label="List view"><i data-lucide="list" class="icon" aria-hidden="true"></i></button></div>
+        </div>
+        <div class="blog-page-grid">
+          <article class="blog-page-card" id="partnership"><div class="blog-page-card-content"><time datetime="2025-10-28">Oct 28, 2025 · 4 min read</time><h2>What’s for real?</h2><p>How a competition idea became a formal DOST–BINHI partnership and a new chapter for Foreal Solutions.</p><a href="blog-post.html#partnership">Read the post →</a></div></article>
+          <article class="blog-page-card" id="agrichain"><div class="blog-page-card-content"><time datetime="2025-09-09">Sep 09, 2025 · 7 min read</time><h2>Saan aabot ang twenty pesos mo?</h2><p>A question about rising food prices led to AgriChain, a tool that helps match crop supply with demand.</p><a href="blog-post.html#agrichain">Read the post →</a></div></article>
+          <article class="blog-page-card" id="mission"><div class="blog-page-card-content"><time datetime="2025-09-03">Sep 03, 2025 · 5 min read</time><h2>This is the real way</h2><p>Foreal’s mission and vision: build accessible, data-driven technology with people and for the realities they live every day.</p><a href="blog-post.html#mission">Read the post →</a></div></article>
+        </div>
+      </div>
+    </main>
+    <footer class="site-footer">
+      <div class="footer-inner shell">
+        <div class="footer-bottom">
+          <span>Foreal Solutions</span><span>WVSU CICT</span><span>© 2025—26</span>
+          <a href="index.html#top">Back home <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        </div>
+      </div>
+    </footer>
+    <script>
+      const page = document.body;
+      const viewButtons = document.querySelectorAll('[data-view]'); viewButtons.forEach((button) => button.addEventListener('click', () => { page.classList.toggle('blog-page-list', button.dataset.view === 'list'); viewButtons.forEach((b) => b.classList.toggle('is-active', b === button)); }));
+    </script>
+    <script src="script.js"></script>
+  </body>
+</html>

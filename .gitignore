@@ -1,2 +1,5 @@
 .work/
-Context Images/Screenshot*.png
+assets/context-assets/Screenshot*.png
+.env
+.env.local
+.env*.local

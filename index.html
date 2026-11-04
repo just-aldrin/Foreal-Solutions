@@ -8,13 +8,10 @@
       content="Foreal Solutions is a student-led tech startup from WVSU building data-driven digital solutions for real-world communities in Iloilo and beyond."
     />
     <title>Foreal Solutions — Ideas Made For Real</title>
-    <link rel="icon" type="image/png" href="assets/foreal-logo-transparent.png" />
+    <link rel="icon" type="image/png" href="assets/ICON.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -22,6 +19,7 @@
       <div class="swarm-cursors"></div>
       <div class="swarm-overlays"></div>
     </div>
+    <div id="foreal-cursor-trail" aria-hidden="true"></div>
 
     <header class="site-header">
       <a class="brand" href="#top" aria-label="Foreal Solutions home">
@@ -35,10 +33,13 @@
         <a href="#about">About</a>
         <a href="#pillars">Pillars</a>
         <a href="#story">Story</a>
-        <a href="#blog">Blog</a>
+        <a href="blog.html">Blog</a>
         <a href="#contact">Contact</a>
       </nav>
-      <a class="nav-cta" href="#contact">Start something <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+      <div class="header-actions">
+        <span id="viewer-count" class="viewer-count"><i class="viewer-dot"></i> connecting…</span>
+        <a class="nav-cta" href="#contact">Start something <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+      </div>
     </header>
 
     <main id="top">
@@ -75,16 +76,16 @@
           aria-label="Foreal Solutions identity"
           data-inspect
         >
-          <div class="coordinate">10°43′N / 122°33′E</div>
+          <div class="coordinate" id="live-clock" aria-label="Current local time">00:00:00</div>
           <figure class="art-card art-card-main">
             <img
-              src="Context Images/795385926_122108321241468239_3318190204258828561_n.jpg"
+              src="assets/context-assets/795385926_122108321241468239_3318190204258828561_n.jpg"
               alt="Foreal Solutions mark: an interconnected X with four color squares"
             />
           </figure>
           <figure class="art-card art-card-small">
             <img
-              src="Context Images/792458918_122097115023468239_4900155433538016484_n.jpg"
+              src="assets/context-assets/792458918_122097115023468239_4900155433538016484_n.jpg"
               alt="Logo branding: interconnected framework, four directional forms, central connection, adaptability"
             />
           </figure>
@@ -145,8 +146,10 @@
             <ul class="skill-list">
               <li>Full-stack Development</li>
               <li>Data Analytics</li>
-              <li>GIS</li>
-              <li>UI/UX</li>
+              <li>GIS Spatial Analysis</li>
+              <li>Business Intelligence</li>
+              <li>UI/UX Design</li>
+              <li>Web Development</li>
             </ul>
             <div class="do-pills">
               <span><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3-1.8 5.7a2 2 0 0 1-1.3 1.3L3 12l5.9 1.8a2 2 0 0 1 1.3 1.3L12 21l1.8-5.9a2 2 0 0 1 1.3-1.3L21 12l-5.9-1.8a2 2 0 0 1-1.3-1.3Z"/></svg> Student-led Innovation</span>
@@ -218,23 +221,17 @@
           </div>
           <figure class="story-visual reveal" data-inspect>
             <img
-              src="Context Images/805831605_122108330727468239_7275732875056334042_n.jpg"
+              src="assets/context-assets/805831605_122108330727468239_7275732875056334042_n.jpg"
               alt="Foreal’s early goal: turn an idea into something that can create real impact."
             />
           </figure>
         </article>
 
         <article class="story-block shell">
-          <div class="story-pair reveal" data-inspect>
+          <div class="story-pair story-pair-single reveal" data-inspect>
             <figure class="story-visual">
               <img
-                src="Context Images/798040325_122099752041468239_7755030641822592527_n.jpg"
-                alt="Where it all started: DAP throwback and ideation."
-              />
-            </figure>
-            <figure class="story-visual">
-              <img
-                src="Context Images/798276275_122099752095468239_869104218500897412_n.jpg"
+                src="assets/context-assets/798276275_122099752095468239_869104218500897412_n.jpg"
                 alt="Foreal Solutions team during prototyping and development."
               />
             </figure>
@@ -256,7 +253,7 @@
         >
           <figure class="story-visual reveal" data-inspect>
             <img
-              src="Context Images/808451116_122108330733468239_666356201271337391_n.jpg"
+              src="assets/context-assets/808451116_122108330733468239_666356201271337391_n.jpg"
               alt="A new chapter: DOST–BINHI partnership contract signing"
             />
           </figure>
@@ -273,7 +270,7 @@
 
       <section class="band scroll-scene" aria-label="The idea moved forward">
         <img
-          src="Context Images/805579489_122108330667468239_8845173576139536449_n.jpg"
+        src="assets/context-assets/805579489_122108330667468239_8845173576139536449_n.png"
           alt=""
         />
         <div class="band-index">04 / onwards</div>
@@ -285,33 +282,29 @@
         </div>
         <div class="live-layout">
           <div class="live-copy reveal">
-            <h2>What are you<br /><span>carrying?</span></h2>
-            <p>Give a rough idea a useful next move.</p>
+            <h2>Before the<br /><span>pitch deck.</span></h2>
+            <p>Sharp takes on building startups, managing projects, and making technology useful from the farm to the market.</p>
           </div>
           <div class="idea-machine reveal">
             <div class="machine-top">
-              <span>foreal / idea machine</span>
-              <span class="machine-status"><i></i> online</span>
+              <span>foreal / behind the build</span>
             </div>
-            <label for="idea-input">your starting point</label>
-            <textarea
-              id="idea-input"
-              rows="3"
-              placeholder="e.g. farmers need a simpler way to see..."
-              maxlength="120"
-            ></textarea>
             <div class="machine-output" aria-live="polite">
-              <span class="output-label">next move</span>
-              <strong id="idea-output"
-                >Every useful thing starts as a question.</strong
-              >
+              <div class="machine-card">
+                <span class="output-label" id="idea-label">the icebreaker</span>
+                <strong id="idea-output">A Cornetto started the conversation. The question that stuck was why twenty pesos buys less at the market.</strong>
+              </div>
+              <div class="machine-loading" id="idea-loading" hidden>
+                <span class="output-label">Loading</span>
+                <strong>Pulling up something good<span class="machine-dots" aria-hidden="true">...</span></strong>
+              </div>
             </div>
             <button
               class="button button-primary machine-button"
               id="shape-idea"
               type="button"
             >
-              Shape the thought <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+              Next card <span aria-hidden="true">→</span>
             </button>
           </div>
         </div>
@@ -357,7 +350,7 @@
           <article class="blog-card reveal">
             <figure class="blog-card-image">
               <img
-                src="Context Images/791510191_122097115221468239_6803668154590233985_n.jpg"
+                src="assets/context-assets/791510191_122097115221468239_6803668154590233985_n.jpg"
                 alt="A student working on a laptop, illustrating Foreal’s digital work."
                 loading="lazy"
               />
@@ -367,14 +360,13 @@
                 <span>mission / vision</span>
                 <time datetime="2025-09-03">Sep 03, 2025</time>
               </div>
-              <h3>A mission built around real needs</h3>
+              <h3>This is the real way</h3>
               <p>
-                Foreal’s mission is to empower communities through student-led
-                innovation, creating accessible, data-driven, sustainable
-                digital solutions for real-world challenges.
+                Foreal builds accessible, data-driven technology with people
+                and for the realities they live every day.
               </p>
-              <a class="blog-link" href="#about">
-                Explore our mission
+              <a class="blog-link" href="blog-post.html#mission">
+                Read the field note
                 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
               </a>
             </div>
@@ -383,24 +375,23 @@
           <article class="blog-card reveal">
             <figure class="blog-card-image">
               <img
-                src="Context Images/798040325_122099752041468239_7755030641822592527_n.jpg"
+                src="assets/context-assets/798040325_122099752041468239_7755030641822592527_n.jpg"
                 alt="Foreal’s DAP throwback, showing the team’s early ideation."
                 loading="lazy"
               />
             </figure>
             <div class="blog-card-content">
               <div class="blog-card-meta">
-                <span>DAP–NextGenPH</span>
+                <span>DAP–NEXTGENPH</span>
                 <time datetime="2025-09-09">Sep 09, 2025</time>
               </div>
-              <h3>From a food challenge to AgriChain</h3>
+              <h3>Saan aabot ang twenty pesos mo?</h3>
               <p>
-                At the DAP–NextGenPH Startup Challenge 2025, the team explored
-                food distribution and developed AgriChain, a decision-support
-                system connecting agricultural supply and demand.
+                A question about rising food prices led to AgriChain, a tool
+                that helps match crop supply with demand.
               </p>
-              <a class="blog-link" href="#story-challenge">
-                Explore the project
+              <a class="blog-link" href="blog-post.html#agrichain">
+                Read the field note
                 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
               </a>
             </div>
@@ -409,7 +400,7 @@
           <article class="blog-card reveal">
             <figure class="blog-card-image">
               <img
-                src="Context Images/808451116_122108330733468239_666356201271337391_n.jpg"
+                src="assets/context-assets/808451116_122108330733468239_666356201271337391_n.jpg"
                 alt="Foreal Solutions’ DOST–BINHI partnership contract signing."
                 loading="lazy"
               />
@@ -419,14 +410,13 @@
                 <span>DOST–BINHI</span>
                 <time datetime="2025-10-28">Oct 28, 2025</time>
               </div>
-              <h3>A new chapter beyond the competition</h3>
+              <h3>What’s for real?</h3>
               <p>
-                A partnership with DOST and the WVSU BINHI Technology Business
-                Incubator marked a step from competition stages toward a
-                formally supported startup.
+                A student competition idea grew into Foreal’s formal
+                partnership with DOST and WVSU BINHI.
               </p>
-              <a class="blog-link" href="#story-partnership">
-                Read about the partnership
+              <a class="blog-link" href="blog-post.html#partnership">
+                Read the field note
                 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
               </a>
             </div>
@@ -441,6 +431,19 @@
           <p class="contact-copy">
             Bring the messy first thought. Let’s make it useful.
           </p>
+          <form class="inquiry-form" id="inquiry-form">
+            <div class="inquiry-grid">
+              <label>Name <input name="name" required autocomplete="name" placeholder="Your name" /></label>
+              <label>Email <input name="email" type="email" required autocomplete="email" placeholder="you@company.com" /></label>
+              <label>Company / organization <input name="company" placeholder="Optional" /></label>
+              <label>Campaign or project <input name="project" required placeholder="What are you building?" /></label>
+            </div>
+            <label>Project details <textarea name="details" required rows="5" placeholder="What are you working on, who is it for, and what would success look like?"></textarea></label>
+            <div class="inquiry-footer">
+              <span id="inquiry-status" aria-live="polite">              We’ll reply with next steps.</span>
+              <button class="button button-light" type="submit">Send inquiry <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></button>
+            </div>
+          </form>
           <div class="contact-actions">
             <a
               class="button button-light"
@@ -476,13 +479,14 @@
             <div class="footer-group">
               <span>Explore</span><a href="#about">The why</a
               ><a href="#pillars">Pillars</a><a href="#story">Story</a
-              ><a href="#blog">Blog</a>
+              ><a href="blog.html">Blog</a>
             </div>
             <div class="footer-group">
               <span>Connect</span
               ><a href="mailto:foreal.solutions@gmail.com">Email us</a
               ><a href="tel:+639763669351">+63 976 366 9351</a
-              ><a href="#contact">Start a conversation</a>
+              ><a href="#contact">Start a conversation</a
+              ><a class="facebook-link" href="https://www.facebook.com/foreal.solutions" target="_blank" rel="noreferrer">Facebook</a>
             </div>
           </div>
         </div>
