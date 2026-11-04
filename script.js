@@ -600,11 +600,42 @@ function initBuildSwarm() {
     if (swarmAudioCtx.state === 'suspended') swarmAudioCtx.resume().catch(() => {});
     return swarmAudioCtx;
   };
-  // Browsers mute audio until a user gesture happens. The swarm plays on
-  // its own right after page load, so the earliest cursors can miss it --
-  // prime/resume the context on the very first interaction anywhere on the
-  // page so later cursors in the same run have a real shot at being heard.
-  const primeSwarmAudio = () => ensureSwarmAudio();
+  // Browsers mute audio until a real user gesture happens -- and the
+  // swarm runs itself the instant the page loads, so on a first-ever
+  // visit it can finish its whole run before any click/tap occurs,
+  // which drops every one of its sounds silently. missedDings counts
+  // those drops; the moment a gesture finally lands, we fire a quick
+  // catch-up chime so the feature is never just mysteriously silent.
+  let missedDings = 0;
+  const playDing = (ctx, at) => {
+    const notes = [1046.5, 1318.5]; // C6 -> E6, a quick confident "ding"
+    notes.forEach((freq, i) => {
+      const t = at + i * 0.045;
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.07, t + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.18);
+    });
+  };
+  const primeSwarmAudio = () => {
+    const ctx = ensureSwarmAudio();
+    if (!ctx) return;
+    const replay = () => {
+      if (missedDings <= 0) return;
+      const count = Math.min(missedDings, 4);
+      const now = ctx.currentTime + 0.05;
+      for (let i = 0; i < count; i += 1) playDing(ctx, now + i * 0.13);
+      missedDings = 0;
+    };
+    if (ctx.state === 'running') replay();
+    else ctx.resume().then(replay).catch(() => {});
+  };
   ['pointerdown', 'keydown', 'touchstart'].forEach((type) => {
     document.addEventListener(type, primeSwarmAudio, { once: true, passive: true });
   });
@@ -615,6 +646,7 @@ function initBuildSwarm() {
   const playFrameBlip = (durationSec) => {
     const ctx = ensureSwarmAudio();
     if (!ctx) return;
+    if (ctx.state !== 'running') missedDings += 1;
     const now = ctx.currentTime;
 
     const startTick = ctx.createOscillator();
@@ -628,21 +660,7 @@ function initBuildSwarm() {
     startTick.start(now);
     startTick.stop(now + 0.08);
 
-    const lockAt = now + durationSec;
-    const notes = [1046.5, 1318.5]; // C6 -> E6, a quick confident "ding"
-    notes.forEach((freq, i) => {
-      const t = lockAt + i * 0.045;
-      const osc = ctx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.07, t + 0.012);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(t);
-      osc.stop(t + 0.18);
-    });
+    playDing(ctx, now + durationSec);
   };
 
   const cornerPoint = (rect, index, bottom = false) => {

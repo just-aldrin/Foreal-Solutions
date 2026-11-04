@@ -1238,7 +1238,8 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
   .story-block-reverse > * { direction: ltr; }
   .story-block-origin .story-visual,
   .story-block-new-chapter .story-visual { justify-self: center; }
-  .story-pair { grid-template-columns: 1fr 1fr; }
+  .story-pair:not(.story-pair-single) { grid-template-columns: 1fr 1fr; }
+  .story-pair-single { grid-template-columns: minmax(0, 1fr); max-width: 100%; }
   .story-pair .story-visual, .story-pair .story-visual img { min-height: 0; }
   .blog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .blog-card-content { padding: 18px; }
