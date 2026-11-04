@@ -1241,10 +1241,14 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
   .story-pair:not(.story-pair-single) { grid-template-columns: 1fr 1fr; }
   .story-pair-single { grid-template-columns: minmax(0, 1fr); max-width: 100%; }
   .story-pair .story-visual, .story-pair .story-visual img { min-height: 0; }
-  /* Mobile reads title + copy first, image after -- same order as the
-     other two story blocks, which already put text first in the DOM. */
+  /* Mobile reads title + copy first, image after, on every story block --
+     story-block-origin already puts text first in the DOM so needs no
+     override; the other two have the image first in the DOM for the
+     desktop side-by-side layout, so flip them back for mobile only. */
   .story-block-making .story-pair-single { order: 2; }
   .story-block-making .story-copy { order: 1; }
+  .story-block-new-chapter .story-visual { order: 2; }
+  .story-block-new-chapter .story-copy { order: 1; }
   .blog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .blog-card-content { padding: 18px; }
   .hero-ui { width: 180px; height: 130px; right: 4%; top: 7%; opacity: .8; }
