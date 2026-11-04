@@ -89,6 +89,33 @@ function initForealCursorMarks() {
     { bg: '#e11d48', fg: '#ffffff' },
   ];
 
+  // A short, playful blip per stamp -- synthesized, no audio file needed.
+  let audioCtx = null;
+  const ensureAudio = () => {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch (e) { return null; }
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+    return audioCtx;
+  };
+  const NOTES = [392.0, 440.0, 493.88, 587.33, 659.25, 739.99]; // little ascending run, one note per color
+  const playBlip = (index) => {
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = NOTES[index % NOTES.length];
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.1, now + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.17);
+  };
+
   let colorIndex = 0;
   let lastPoint = null;
   const isBlocked = (event) => event.target.closest?.(blocked)
@@ -129,6 +156,7 @@ function initForealCursorMarks() {
 
   const stamp = (x, y) => {
     const { bg, fg } = colors[colorIndex];
+    playBlip(colorIndex);
     colorIndex = (colorIndex + 1) % colors.length;
     const mark = document.createElement('span');
     mark.className = 'fcm-mark';
