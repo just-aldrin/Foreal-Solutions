@@ -156,7 +156,7 @@ html.light .theme-toggle .icon-moon { display: block; }
   display: flex;
   gap: 28px;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--muted);
@@ -181,7 +181,7 @@ html.light .theme-toggle .icon-moon { display: block; }
 .nav-cta {
   flex: 0 0 auto;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--on-accent);
   background: var(--lime);
   padding: 11px 16px;
@@ -1186,7 +1186,7 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
     align-items: center;
     gap: clamp(6px, 2vw, 12px);
     min-width: 0;
-    font-size: 8px;
+    font-size: 9px;
     letter-spacing: 0.02em;
     transform: translateX(-10px);
   }
@@ -1258,7 +1258,7 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
 @media (max-width: 360px) {
   .site-header { padding-inline: 8px; gap: 6px; }
   .brand-image { width: 56px; height: 26px; }
-  .main-nav { gap: 5px; font-size: 6px; letter-spacing: 0; transform: translateX(-8px); }
+  .main-nav { gap: 5px; font-size: 7px; letter-spacing: 0; transform: translateX(-8px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
