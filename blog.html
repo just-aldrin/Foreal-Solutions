@@ -30,16 +30,38 @@
       @media (max-width:800px) { .blog-page { padding-top:110px; } .blog-page-head { display:block; } .blog-tools { margin-top:24px; } .blog-page-grid { grid-template-columns:1fr; } }
     </style>
   </head>
-  <body>
+  <body id="top">
     <div id="swarm-root" aria-hidden="true">
       <div class="swarm-cursors"></div>
       <div class="swarm-overlays"></div>
     </div>
     <div id="foreal-cursor-trail" aria-hidden="true"></div>
     <header class="site-header">
-      <a class="brand" href="index.html#top" aria-label="Foreal Solutions home"><img class="brand-image" src="assets/foreal-logo-transparent.png" alt="Foreal Solutions" /></a>
-      <nav class="main-nav" aria-label="Primary navigation"><a href="index.html#about">About</a><a href="index.html#pillars">Pillars</a><a href="index.html#story">Story</a><a href="blog.html">Blog</a><a href="index.html#contact">Contact</a></nav>
+      <a class="brand" href="index.html#top" aria-label="Foreal Solutions home">
+        <img
+          class="brand-image"
+          src="assets/foreal-logo-transparent.png"
+          alt="Foreal Solutions"
+        />
+      </a>
+      <nav class="main-nav" aria-label="Primary navigation">
+        <a href="index.html#about">About</a>
+        <a href="index.html#pillars">Pillars</a>
+        <a href="index.html#story">Story</a>
+        <a href="blog.html">Blog</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
       <div class="header-actions">
+        <span id="viewer-count" class="viewer-count">
+          <i class="viewer-dot" aria-hidden="true"></i>
+          <span class="viewer-avatars" aria-hidden="true" hidden>
+            <span class="viewer-avatar" hidden></span>
+            <span class="viewer-avatar" hidden></span>
+            <span class="viewer-avatar" hidden></span>
+            <span class="viewer-overflow" hidden>+</span>
+          </span>
+          <span class="viewer-label">connecting…</span>
+        </span>
         <a class="nav-cta" href="index.html#contact">Start something <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
       </div>
     </header>
@@ -58,9 +80,39 @@
     </main>
     <footer class="site-footer">
       <div class="footer-inner shell">
+        <div class="footer-top">
+          <div class="footer-brand-block">
+            <a
+              class="brand footer-brand"
+              href="index.html#top"
+              aria-label="Foreal Solutions home"
+            >
+              <img
+                class="brand-image"
+                src="assets/foreal-logo-transparent.png"
+                alt="Foreal Solutions"
+              />
+            </a>
+            <p>Ideas made for real.<br />Iloilo City, Philippines.</p>
+          </div>
+          <div class="footer-links">
+            <div class="footer-group">
+              <span>Explore</span><a href="index.html#about">The why</a
+              ><a href="index.html#pillars">Pillars</a><a href="index.html#story">Story</a
+              ><a href="blog.html">Blog</a>
+            </div>
+            <div class="footer-group">
+              <span>Connect</span
+              ><a href="mailto:foreal.solutions@gmail.com">Email us</a
+              ><a href="tel:+639763669351">+63 976 366 9351</a
+              ><a href="index.html#contact">Start a conversation</a
+              ><a class="facebook-link" href="https://www.facebook.com/foreal.solutions" target="_blank" rel="noreferrer">Facebook</a>
+            </div>
+          </div>
+        </div>
         <div class="footer-bottom">
-          <span>Foreal Solutions</span><span>WVSU CICT</span><span>© 2025—26</span>
-          <a href="index.html#top">Back home <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          <span>Foreal Solutions</span><span>WVSU CICT</span
+          ><span>© 2025—26</span><a href="#top">Back to top <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg></a>
         </div>
       </div>
     </footer>

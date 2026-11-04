@@ -37,7 +37,16 @@
         <a href="#contact">Contact</a>
       </nav>
       <div class="header-actions">
-        <span id="viewer-count" class="viewer-count"><i class="viewer-dot"></i> connecting…</span>
+        <span id="viewer-count" class="viewer-count">
+          <i class="viewer-dot" aria-hidden="true"></i>
+          <span class="viewer-avatars" aria-hidden="true" hidden>
+            <span class="viewer-avatar" hidden></span>
+            <span class="viewer-avatar" hidden></span>
+            <span class="viewer-avatar" hidden></span>
+            <span class="viewer-overflow" hidden>+</span>
+          </span>
+          <span class="viewer-label">connecting…</span>
+        </span>
         <a class="nav-cta" href="#contact">Start something <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
       </div>
     </header>

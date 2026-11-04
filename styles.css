@@ -1075,6 +1075,30 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
 }
 .viewer-count.is-offline { color: var(--muted); }
 .viewer-count.is-offline .viewer-dot { background: var(--muted); box-shadow: none; animation: none; }
+.viewer-avatars:not([hidden]) { display: inline-flex; align-items: center; flex: 0 0 auto; }
+.viewer-avatar {
+  position: relative;
+  width: 21px;
+  height: 21px;
+  overflow: hidden;
+  border: 1px solid var(--night);
+  border-radius: 50%;
+  background: var(--lime);
+  color: var(--on-accent);
+}
+.viewer-avatar + .viewer-avatar { margin-left: -6px; }
+.viewer-avatar:nth-child(2) { background: var(--cyan); }
+.viewer-avatar:nth-child(3) { background: var(--pink); }
+.viewer-overflow { margin-left: 3px; font-size: 14px; line-height: 1; }
+.viewer-avatar::before, .viewer-avatar::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: currentColor;
+}
+.viewer-avatar::before { top: 4px; width: 6px; height: 6px; border-radius: 50%; }
+.viewer-avatar::after { top: 11px; width: 12px; height: 10px; border-radius: 50% 50% 0 0; }
 @media (max-width: 900px) {
   .viewer-count { display: none; }
 }

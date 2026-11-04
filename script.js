@@ -277,16 +277,24 @@ function initInquiryForm() {
 function initViewerPresence() {
   const count = document.querySelector('#viewer-count');
   if (!count) return;
+  const label = count.querySelector('.viewer-label');
+  const stack = count.querySelector('.viewer-avatars');
+  const avatars = stack.querySelectorAll('.viewer-avatar');
+  const overflow = stack.querySelector('.viewer-overflow');
   const visitorId = localStorage.getItem('foreal-visitor-id')
     || (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
   localStorage.setItem('foreal-visitor-id', visitorId);
 
   const setLabel = (n) => {
-    count.innerHTML = `<i class="viewer-dot"></i> ${n} LIVE VIEWER${n === 1 ? '' : 'S'}`;
+    label.textContent = `${n} LIVE VIEWER${n === 1 ? '' : 'S'}`;
+    avatars.forEach((avatar, index) => { avatar.hidden = index >= n; });
+    overflow.hidden = n <= avatars.length;
+    stack.hidden = false;
     count.classList.remove('is-offline');
   };
   const setOffline = () => {
-    count.innerHTML = '<i class="viewer-dot"></i> LIVE VIEWERS UNAVAILABLE';
+    label.textContent = 'LIVE VIEWERS UNAVAILABLE';
+    stack.hidden = true;
     count.classList.add('is-offline');
   };
 
