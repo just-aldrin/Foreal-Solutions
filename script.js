@@ -26,11 +26,11 @@ function getSupabaseClient() {
   const motionAllowed = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (motionAllowed) initForealCursorMarks();
 
+  initBuildStories();
   initClock();
   initInquiryForm();
   initViewerPresence();
   initLucideIcons();
-  initBuildStories();
 
   document.querySelectorAll('a[href^="#"]').forEach((link) => {
     link.addEventListener('click', (event) => {
@@ -190,15 +190,18 @@ function initClock() {
 }
 
 function initBuildStories() {
-  const output = document.querySelector('#idea-output');
-  const label = document.querySelector('#idea-label');
   const button = document.querySelector('#shape-idea');
-  const loader = document.querySelector('#idea-loading');
-  if (!output || !label || !button || !loader) return;
-  const panel = loader.parentElement;
+  if (!button) return;
+  const flip = button.querySelector('.machine-flip');
+  const faces = [...flip.children];
+  const loader = button.querySelector('#idea-loading');
+  const announcement = document.querySelector('#idea-announcement');
+  const layers = [...button.querySelectorAll('.machine-stack-layer')];
+  const firstTopic = faces[0].querySelector('.output-label').textContent;
+  const firstStory = faces[0].querySelector('strong').textContent;
 
   const stories = [
-    [label.textContent, output.textContent.trim()],
+    [firstTopic, firstStory],
     ['the market question', 'A price tag tells you what lunch costs. AgriChain asks what got it there, using crop supply and demand to make sense of the numbers.'],
     ['the rough drafts', 'The first pitch had company: feedback, rewrites, and late nights. The version that made it out of the classroom had been through all three.'],
     ['the paperwork era', 'The idea went from a competition entry to a DOST–BINHI contract signing. The pitch deck finally met its natural enemy: paperwork.'],
@@ -209,38 +212,251 @@ function initBuildStories() {
     ['startup motivation', 'After a pitch rejection, write down the question you struggled to answer. Turn it into the next experiment.'],
     ['startup quote', 'A feature is a promise. Ship the one you can keep.'],
   ];
-  let index = 0;
-  const recent = [output.textContent.trim()];
 
-  button.addEventListener('click', async () => {
-    button.disabled = true;
-    panel.classList.add('is-loading');
+  // The stacked cards behind the front one aren't blank -- give each a
+  // real preview line pulled from the same story bank.
+  let queueCursor = layers.length + 1; // index 0 = front card, 1..layers.length already used by the initial stack
+  layers.forEach((layer, i) => {
+    const [topic, story] = stories[(i + 1) % stories.length];
+    layer.innerHTML = `<span class="machine-stack-layer-label">${topic}</span><span class="machine-stack-layer-line">${story.slice(0, 64)}…</span>`;
+  });
+
+  // Real FIFO: the nearest card in the stack graduates to become the new
+  // front card, every other card physically moves one slot closer, and a
+  // fresh card joins at the back. No bounce-back -- the DOM order actually
+  // changes, so the CSS transition on .machine-stack-layer animates the
+  // real move.
+  const advanceStackQueue = () => {
+    const stack = button.querySelector('.machine-stack');
+    const current = [...stack.querySelectorAll('.machine-stack-layer')];
+    if (!current.length) return;
+    // Freeze everyone's current on-screen position so removing/inserting
+    // nodes doesn't cause a visual jump.
+    current.forEach((layer) => {
+      const cs = getComputedStyle(layer);
+      layer.style.transform = cs.transform === 'none' ? '' : cs.transform;
+      layer.style.opacity = cs.opacity;
+      layer.style.transition = 'none';
+    });
+    void stack.offsetWidth; // flush the freeze before mutating
+
+    current[current.length - 1].remove(); // nearest card graduates to the front
+
+    const fresh = document.createElement('span');
+    fresh.className = 'machine-stack-layer';
+    const [topic, story] = stories[queueCursor % stories.length];
+    queueCursor += 1;
+    fresh.innerHTML = `<span class="machine-stack-layer-label">${topic}</span><span class="machine-stack-layer-line">${story.slice(0, 64)}…</span>`;
+    fresh.style.transition = 'none';
+    fresh.style.opacity = '0';
+    stack.insertBefore(fresh, stack.firstChild);
+    void stack.offsetWidth;
+
+    requestAnimationFrame(() => {
+      [...stack.querySelectorAll('.machine-stack-layer')].forEach((layer) => {
+        layer.style.transition = '';
+        layer.style.transform = '';
+        layer.style.opacity = '';
+      });
+    });
+  };
+
+  const trackTilt = (event) => {
+    const rect = button.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width * 2 - 1;
+    const y = (event.clientY - rect.top) / rect.height * 2 - 1;
+    // Tilt AWAY from the cursor, not toward it.
+    button.style.setProperty('--deck-pitch', `${-y * 14}deg`);
+    button.style.setProperty('--deck-yaw', `${x * 17}deg`);
+    button.style.setProperty('--deck-roll', `${x * 5}deg`);
+    button.classList.add('is-tracking');
+  };
+  button.addEventListener('pointermove', (event) => {
+    if (event.pointerType === 'touch') return;
+    if (dragging) return;
+    button.classList.remove('is-touch');
+    trackTilt(event);
+  }, { passive: true });
+  button.addEventListener('pointerleave', () => { if (!dragging) button.classList.remove('is-tracking'); });
+  button.addEventListener('pointercancel', () => { if (!dragging) button.classList.remove('is-tracking'); });
+
+  let activeFace = 0;
+  let previousCategory = '';
+  const seen = [firstStory];
+  const words = (text) => new Set(text.toLowerCase().match(/[\p{L}\p{N}]+/gu) || []);
+  const isFresh = (text) => {
+    const candidate = words(text);
+    return candidate.size > 0 && !seen.some((story) => {
+      const previous = words(story);
+      const shared = [...candidate].filter((word) => previous.has(word)).length;
+      return shared / (candidate.size + previous.size - shared) >= 0.72;
+    });
+  };
+
+  const drawNewCard = async () => {
+    if (button.getAttribute('aria-disabled') === 'true') return;
+    button.setAttribute('aria-disabled', 'true');
+    const outgoing = faces[activeFace];
+    const nextFace = 1 - activeFace;
+    const incoming = faces[nextFace];
+    const topicEl = incoming.querySelector('.output-label');
+    const storyEl = incoming.querySelector('strong');
+    const hint = incoming.querySelector('.machine-hint').firstChild;
+    incoming.append(loader);
+    incoming.classList.add('is-loading');
     loader.hidden = false;
+    announcement.textContent = 'Pulling up something good…';
     const minimumDisplay = new Promise((resolve) => setTimeout(resolve, 1000));
+    flip.classList.toggle('is-flipped', nextFace === 1);
+    button.classList.remove('is-cycling');
+    void button.offsetWidth; // restart the animation even if clicked again fast
+    button.classList.add('is-cycling');
+    button.addEventListener('animationend', () => button.classList.remove('is-cycling'), { once: true });
+    advanceStackQueue();
+    const request = new AbortController();
+    const requestTimeout = setTimeout(() => request.abort(), 24000);
     let card;
     try {
-      const avoid = encodeURIComponent(recent.join('|'));
-      const response = await fetch(`./api/trivia?avoid=${avoid}`, { signal: AbortSignal.timeout(12000) });
-      if (response.ok) {
-        const { trivia, label: topic } = await response.json();
-        if (trivia && topic && !recent.includes(trivia)) card = [topic, trivia];
+      const avoid = seen.slice(-8);
+      for (let attempt = 0; attempt < 2 && !card; attempt += 1) {
+        const params = new URLSearchParams({ avoid: avoid.slice(-8).join('|'), previousCategory });
+        const response = await fetch(`./api/trivia?${params}`, { signal: request.signal, cache: 'no-store' });
+        if (!response.ok) break;
+        const { trivia, label: topic, category } = await response.json();
+        if (typeof trivia !== 'string' || typeof topic !== 'string') break;
+        if (isFresh(trivia)) {
+          card = [topic, trivia];
+          previousCategory = category || '';
+        } else {
+          avoid.push(trivia);
+        }
       }
     } catch {
       // The homepage also runs on static hosts without the generator.
+    } finally {
+      clearTimeout(requestTimeout);
     }
     await minimumDisplay;
-    if (!card) {
-      index = (index + 1) % stories.length;
-      card = stories[index];
+    card ??= stories.find(([, story]) => isFresh(story));
+    if (card) {
+      const [topic, story] = card;
+      topicEl.textContent = topic;
+      storyEl.textContent = story;
+      hint.textContent = 'Flip for the next card ';
+      seen.push(story);
+      announcement.textContent = `${topic}. ${story}`;
+    } else {
+      const message = 'No fresh card yet. Try again.';
+      topicEl.textContent = outgoing.querySelector('.output-label').textContent;
+      storyEl.textContent = outgoing.querySelector('strong').textContent;
+      hint.textContent = message + ' ';
+      announcement.textContent = message;
     }
-    const [topic, story] = card;
-    label.textContent = topic;
-    output.textContent = story;
-    recent.push(story);
-    if (recent.length > 4) recent.shift();
     loader.hidden = true;
-    panel.classList.remove('is-loading');
-    button.disabled = false;
+    incoming.classList.remove('is-loading');
+    activeFace = nextFace;
+    button.removeAttribute('aria-disabled');
+  };
+
+  button.addEventListener('click', () => {
+    if (suppressClick) { suppressClick = false; return; }
+    drawNewCard();
+  });
+
+  // Drag the card away (aggressively) to toss it and draw a new one --
+  // a light drag just snaps back, same as the hover tilt does nothing
+  // drastic on its own.
+  let dragging = false;
+  let dragMoved = false;
+  let suppressClick = false;
+  let startX = 0;
+  let startY = 0;
+  let startTime = 0;
+  let activePointerId = null;
+  const DRAG_THRESHOLD = 8;
+  const FLING_DISTANCE = 110;
+  const FLING_VELOCITY = 0.6; // px/ms
+
+  const setDrag = (dx, dy) => {
+    button.style.setProperty('--deck-drag-x', `${dx}px`);
+    button.style.setProperty('--deck-drag-y', `${dy * 0.4}px`);
+    button.style.setProperty('--deck-drag-rotate', `${Math.max(-22, Math.min(22, dx * 0.08))}deg`);
+  };
+  const resetDrag = () => {
+    button.style.removeProperty('--deck-drag-x');
+    button.style.removeProperty('--deck-drag-y');
+    button.style.removeProperty('--deck-drag-rotate');
+  };
+
+  button.addEventListener('pointerdown', (event) => {
+    if (event.pointerType !== 'mouse' && event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
+    if (button.getAttribute('aria-disabled') === 'true') return;
+    dragging = true;
+    dragMoved = false;
+    startX = event.clientX;
+    startY = event.clientY;
+    startTime = performance.now();
+    activePointerId = event.pointerId;
+    try { button.setPointerCapture(event.pointerId); } catch (e) {}
+    if (event.pointerType === 'touch') { button.classList.add('is-touch'); trackTilt(event); }
+  });
+
+  button.addEventListener('pointermove', (event) => {
+    if (!dragging || event.pointerId !== activePointerId) return;
+    const dx = event.clientX - startX;
+    const dy = event.clientY - startY;
+    if (!dragMoved && Math.hypot(dx, dy) > DRAG_THRESHOLD) {
+      dragMoved = true;
+      button.classList.add('is-dragging');
+    }
+    if (dragMoved) {
+      event.preventDefault();
+      setDrag(dx, dy);
+    }
+  });
+
+  const endDrag = (event) => {
+    if (!dragging || (event.pointerId !== undefined && event.pointerId !== activePointerId)) return;
+    dragging = false;
+    button.classList.remove('is-dragging', 'is-tracking', 'is-touch');
+    if (!dragMoved) { resetDrag(); return; }
+    const dx = event.clientX - startX;
+    const dy = event.clientY - startY;
+    const elapsed = Math.max(1, performance.now() - startTime);
+    const distance = Math.hypot(dx, dy);
+    const velocity = distance / elapsed;
+    suppressClick = true;
+    const MIN_FLING_DISTANCE = 36; // guards against misreading a quick click as an aggressive drag
+    if (distance > FLING_DISTANCE || (distance > MIN_FLING_DISTANCE && velocity > FLING_VELOCITY)) {
+      const flyX = dx === 0 ? (Math.random() > 0.5 ? 1 : -1) : Math.sign(dx);
+      button.classList.add('is-flung');
+      setDrag(flyX * Math.max(820, Math.abs(dx) * 2.4), dy * 1.8);
+      let settled = false;
+      const settle = () => {
+        if (settled) return;
+        settled = true;
+        button.classList.remove('is-flung');
+        button.classList.add('is-dragging'); // skip the transition for the instant reset
+        resetDrag();
+        requestAnimationFrame(() => button.classList.remove('is-dragging'));
+        drawNewCard();
+      };
+      // transitionend should fire this, but don't rely on it alone --
+      // a guaranteed timer backs it up in case the browser skips the event.
+      const stack = button.querySelector('.machine-stack');
+      stack.addEventListener('transitionend', (e) => { if (e.propertyName === 'transform') settle(); }, { once: true });
+      setTimeout(settle, 420);
+    } else {
+      resetDrag();
+    }
+    dragMoved = false;
+  };
+  button.addEventListener('pointerup', endDrag);
+  button.addEventListener('pointercancel', (event) => {
+    dragging = false;
+    dragMoved = false;
+    button.classList.remove('is-dragging', 'is-tracking', 'is-touch', 'is-flung');
+    resetDrag();
   });
 }
 

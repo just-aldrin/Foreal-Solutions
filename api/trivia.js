@@ -42,7 +42,8 @@ export default async function handler(request, response) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return response.status(503).json({ error: 'Trivia generator is not configured.' });
 
-  const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
+  const topics = CATEGORIES.filter(({ key }) => key !== request.query?.previousCategory);
+  const category = topics[Math.floor(Math.random() * topics.length)];
   const grounded = FACTS[category.key];
 
   // The client sends the last few facts it already showed this session so
@@ -51,7 +52,7 @@ export default async function handler(request, response) {
   let avoid = [];
   try {
     const raw = request.query?.avoid;
-    if (raw) avoid = String(raw).split('|').map((s) => s.trim()).filter(Boolean).slice(0, 5);
+    if (raw) avoid = String(raw).split('|').map((s) => s.trim().slice(0, 230)).filter(Boolean).slice(0, 8);
   } catch (e) {}
 
   const promptParts = [
@@ -75,13 +76,13 @@ ${grounded}`
 
   try {
     const geminiRes = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-goog-api-key': apiKey },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 1, maxOutputTokens: 140 },
+          generationConfig: { temperature: 1, maxOutputTokens: 512 },
         }),
       }
     );
@@ -89,7 +90,8 @@ ${grounded}`
       return response.status(502).json({ error: 'Trivia generation failed.' });
     }
     const data = await geminiRes.json();
-    const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text).join('').trim();
+    const text = data?.candidates?.[0]?.content?.parts?.filter((part) => !part.thought)
+      .map((part) => part.text).join('').trim();
     if (!text || text.length > 230) return response.status(502).json({ error: 'Invalid card from model.' });
     return response.status(200).json({ trivia: text, category: category.key, label: category.label });
   } catch (error) {

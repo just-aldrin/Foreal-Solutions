@@ -487,6 +487,7 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
 .do-pills span {
   display: inline-flex;
   align-items: center;
+  white-space: nowrap;
   gap: 5px;
   background: var(--violet);
   color: white;
@@ -495,6 +496,13 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
   font-weight: 600;
 }
 .do-pills .icon { width: 12px; height: 12px; color: var(--lime-text); }
+
+@media (min-width: 1000px) {
+  .do-pills span {
+    flex-grow: 1;
+    justify-content: center;
+  }
+}
 
 .pillars-section { padding-bottom: var(--space-section); }
 .section-heading {
@@ -600,17 +608,6 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
   object-fit: cover;
   filter: saturate(1.1);
 }
-.band-index {
-  position: absolute;
-  left: clamp(19px, 8vw, 120px);
-  bottom: 24px;
-  padding: 8px 10px;
-  color: var(--on-accent);
-  background: var(--lime);
-  font: 10px var(--mono);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-}
 
 .live-idea {
   border-top: 1px solid var(--line);
@@ -624,59 +621,172 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
   align-items: start;
 }
 .live-copy p { color: var(--muted); max-width: 280px; margin: 28px 0 0; }
-.idea-machine {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  padding: 22px;
-}
-.machine-top {
-  display: flex;
-  justify-content: space-between;
-  color: var(--muted);
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--line);
-}
-.idea-machine label {
+.idea-machine { min-width: 0; padding: 10px 12px 26px; }
+.machine-deck {
+  position: relative;
   display: block;
-  color: var(--lime-text);
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: grab;
+  touch-action: none;
+}
+.machine-deck.is-dragging { cursor: grabbing; }
+.machine-stack {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  border-radius: inherit;
+  perspective: 1100px;
+  pointer-events: none;
+  transition: transform 300ms var(--ease-out);
+}
+.machine-stack-layer {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+  padding: clamp(16px, 3vw, 28px);
+  border: 1px solid var(--line);
+  border-radius: inherit;
+  background: var(--panel);
+  pointer-events: none;
+  transition: transform 520ms cubic-bezier(.25,.65,.25,1), opacity 420ms var(--ease-out);
+}
+.machine-stack-layer-label {
   font-family: var(--mono);
   font-size: 10px;
   text-transform: uppercase;
-  margin: 26px 0 10px;
+  letter-spacing: .08em;
+  color: var(--lime-text);
 }
-.idea-machine textarea {
+.machine-stack-layer-line {
+  max-width: 85%;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+/* Source order: layer 1 is furthest back (biggest offset, faintest),
+   layer 3 is nearest the front card -- like the reference deck: a clear,
+   generous diagonal cascade down and to the right, not a sliver of edge. */
+.machine-stack-layer:nth-child(1) { transform: translate(40px, 58px) rotate(5deg); opacity: .4; background: var(--night); }
+.machine-stack-layer:nth-child(2) { transform: translate(26px, 38px) rotate(3deg); opacity: .62; background: var(--night); }
+.machine-stack-layer:nth-child(3) { transform: translate(13px, 19px) rotate(1.5deg); opacity: .88; }
+.machine-top-card {
   display: block;
-  width: 100%;
-  border: 0;
-  border-bottom: 1px solid var(--line);
-  background: transparent;
-  color: var(--ink);
-  resize: none;
-  outline: 0;
-  font-size: 22px;
-  line-height: 1.15;
-  padding: 4px 0 16px;
-}
-.idea-machine textarea::placeholder { color: #625e68; }
-.machine-output {
   position: relative;
-  border: 1px dashed rgba(255, 255, 255, 0.24);
-  padding: 17px;
-  margin: 24px 0 18px;
-  min-height: 140px;
+  border-radius: inherit;
+  transition: transform 300ms var(--ease-out);
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* Tilt applies to the whole stack -- it's one deck turning in your hand. */
+  .machine-deck:is(.is-tracking, .is-touch[aria-disabled="true"]) .machine-stack {
+    transform: perspective(900px) translateY(-8px)
+      rotateX(var(--deck-pitch, 0deg))
+      rotateY(var(--deck-yaw, 0deg))
+      rotateZ(var(--deck-roll, 0deg))
+      scale(.96);
+    transition-duration: 140ms;
+  }
+  .machine-deck:is(.is-tracking, .is-touch[aria-disabled="true"]) .machine-stack-layer:nth-child(1) { transform: translate(48px, 68px) rotate(6deg); }
+  .machine-deck:is(.is-tracking, .is-touch[aria-disabled="true"]) .machine-stack-layer:nth-child(2) { transform: translate(32px, 46px) rotate(4deg); }
+  .machine-deck:is(.is-tracking, .is-touch[aria-disabled="true"]) .machine-stack-layer:nth-child(3) { transform: translate(16px, 24px) rotate(2deg); }
+  /* Dragging/flinging only ever moves the top card -- the rest of the
+     deck stays put underneath it. */
+  .machine-deck:is(.is-dragging, .is-flung) .machine-top-card {
+    transform: translate(var(--deck-drag-x, 0px), var(--deck-drag-y, 0px)) rotate(var(--deck-drag-rotate, 0deg));
+  }
+  .machine-deck.is-dragging .machine-top-card { transition: none !important; }
+  .machine-deck.is-flung .machine-top-card { transition: transform 340ms cubic-bezier(.2,.7,.3,1), opacity 340ms ease !important; opacity: 0; }
+}
+.machine-deck:focus-visible { outline: none; }
+.machine-deck[aria-disabled="true"] { cursor: progress; }
+/* The drawn card lifts up as it flips. The stack behind it advances for
+   real (see advanceStackQueue in script.js): each remaining card is
+   physically reordered to the next DOM slot, so this transition on the
+   base .machine-stack-layer rule is what animates them stepping forward
+   -- first in, first out, not a bounce back to where they started. */
+@media (prefers-reduced-motion: no-preference) {
+  .machine-deck.is-cycling { animation: deck-cycle 620ms var(--ease-out); }
+  @keyframes deck-cycle {
+    0% { transform: translateY(0) rotate(0deg); }
+    38% { transform: translateY(-22px) rotate(-3deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+  }
+}
+.machine-flip {
+  display: grid;
+  transform-style: preserve-3d;
+  border-radius: inherit;
+  transform: rotateX(0deg);
+  transition: transform 540ms cubic-bezier(.25,.65,.25,1);
+}
+.machine-flip.is-flipped { transform: rotateX(-180deg); }
+.machine-face {
+  grid-area: 1 / 1;
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 245px;
+  flex-direction: column;
+  padding: clamp(16px, 3vw, 28px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .24);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.machine-face-back { transform: rotateX(-180deg); }
+.machine-top {
+  display: block;
+  color: var(--muted);
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.machine-output {
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  padding-block: 20px;
   text-transform: none;
+  overflow-wrap: anywhere;
 }
-.machine-output.is-loading .machine-card { visibility: hidden; }
+.machine-hint {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--lime-text);
+  font: 11px var(--mono);
+}
+.machine-hint span { font-size: 18px; }
+.machine-face.is-loading > :not(.machine-loading) { visibility: hidden; }
+.machine-loading[hidden] { display: none; }
 .machine-loading:not([hidden]) {
   position: absolute;
   inset: 0;
-  padding: 17px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  min-height: 0;
+  border: 0;
+  box-shadow: none;
+}
+.machine-announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .machine-dots {
   display: inline-block;
@@ -703,7 +813,6 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
   line-height: 1.3;
   display: block;
 }
-.machine-button { width: 100%; }
 
 .process-section { padding-block: var(--space-section); }
 .route-list { border-top: 1px solid var(--line); }
@@ -923,15 +1032,13 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
 .route-item:nth-child(2) { transition-delay: 60ms; }
 .route-item:nth-child(3) { transition-delay: 120ms; }
 .js .scroll-scene .section-kicker,
-.js .scroll-scene .section-heading p,
-.js .scroll-scene .band-index {
+.js .scroll-scene .section-heading p {
   opacity: 0;
   transform: translateY(14px);
   transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
 }
 .js .scroll-scene.is-inview .section-kicker,
-.js .scroll-scene.is-inview .section-heading p,
-.js .scroll-scene.is-inview .band-index {
+.js .scroll-scene.is-inview .section-heading p {
   opacity: 1;
   transform: none;
 }
@@ -1056,7 +1163,7 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--cyan);
+  color: #fff;
   background: transparent;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -1066,8 +1173,8 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
 .viewer-count .viewer-dot {
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: var(--cyan);
-  box-shadow: 0 0 8px var(--cyan);
+  background: var(--lime);
+  box-shadow: 0 0 8px var(--lime);
   animation: pulse 1.8s ease-in-out infinite;
   flex: 0 0 auto;
 }
@@ -1233,8 +1340,6 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
   .story-pair .story-visual img { object-fit: cover; }
   .band { height: 62vw; min-height: 210px; }
   .live-idea { padding-block: 60px 68px; }
-  .idea-machine { padding: 18px; }
-  .idea-machine textarea { font-size: 18px; }
   .process-section { padding-block: 72px; }
   .route-item { padding: 20px 0; gap: 12px; }
   .route-item h3 { font-size: 22px; }
@@ -1268,7 +1373,6 @@ h1 em, h2 em { font-style: normal; color: var(--lime-text); }
   }
   .reveal { opacity: 1; transform: none; }
   .js .scroll-scene .section-kicker,
-  .js .scroll-scene .section-heading p,
-  .js .scroll-scene .band-index { opacity: 1; transform: none; }
+  .js .scroll-scene .section-heading p { opacity: 1; transform: none; }
   #swarm-root { display: none; }
 }
