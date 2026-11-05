@@ -511,7 +511,7 @@ function initInquiryForm() {
       form.reset();
       status.textContent = 'Thanks — your inquiry is in. We’ll reply soon.';
     } catch (error) {
-      status.textContent = 'Could not send right now. Please email foreal.solutions@gmail.com.';
+      status.textContent = 'Could not send right now. Please email forealsolutions.work@gmail.com.';
     } finally {
       submit.disabled = false;
     }
